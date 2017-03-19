@@ -1,0 +1,25 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * @file
+ * Contains custom_node_access.module.
+ */
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ */
+function custom_node_access_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  if ($form['field_access']) {
+    $node = $form_state->getFormObject()->getEntity();
+    $form['access_settings'] = array(
+      '#description' => t('Specify any additional user roles that may access this content. <em>(Warning: delete access <strong>ALSO</strong> grants editing privileges.)</em>'),
+      '#group' => 'advanced',
+      '#title' => t('User role access'),
+      '#type' => 'details',
+      '#weight' => -1,
+    );
+    $form['field_access']['#group'] = 'access_settings';
+  }
+}
