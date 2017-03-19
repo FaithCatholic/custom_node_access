@@ -1,16 +1,21 @@
 <?php
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * @file
  * Contains custom_node_access.module.
  */
 
+define('CUSTOM_NODE_ACCESS_GRANT_ALL', 42);
+
 /**
  * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
  */
 function custom_node_access_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  // @todo, is there a way to automatically add this field to all nodes?
   if ($form['field_access']) {
     $node = $form_state->getFormObject()->getEntity();
     $form['access_settings'] = array(
@@ -21,5 +26,54 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
       '#weight' => -1,
     );
     $form['field_access']['#group'] = 'access_settings';
+  }
+}
+
+function custom_node_access_node_grants(AccountInterface $account, $op) {
+  // @todo, grab the node using arg1, then compare node access roles to account roles.
+  $grants = array();
+  if ($account->id() > 0) {
+    $grants['custom_node_access_author'] = array($account->id());
+  }
+  if ($op == 'view') {
+    $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+  }
+  if ($op == 'update' || $op == 'delete') {
+    $grants['custom_node_access_edit'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+  }
+  return $grants;
+}
+
+function custom_node_access_node_access_records(NodeInterface $node)  {
+  // @todo, there was a 2nd condition looking to see if field_access is set
+  if ($node->hasField('field_access')) {
+    $grants = array();
+    $grants[] = [
+      'realm' => 'custom_node_access_view',
+      'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    ];
+    $grants[] = [
+      'realm' => 'custom_node_access_edit',
+      'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
+      'grant_view' => 1,
+      'grant_update' => 1,
+      'grant_delete' => 1,
+      'priority' => 0,
+    ];
+    if ($node->getOwnerId()) {
+      $grants[] = [
+        'realm' => 'custom_node_access_author',
+        'gid' => $node->getOwnerId(),
+        'grant_view' => 1,
+        'grant_update' => 1,
+        'grant_delete' => 1,
+        'priority' => 0,
+      ];
+    }
+    return $grants;
   }
 }
