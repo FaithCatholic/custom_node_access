@@ -1,7 +1,9 @@
 <?php
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 
 /**
@@ -29,24 +31,59 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
   }
 }
 
+// function custom_node_access_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+//   return AccessResult::neutral();
+// }
+
 function custom_node_access_node_grants(AccountInterface $account, $op) {
-  // @todo, grab the node using arg1, then compare node access roles to account roles.
+  $path = \Drupal::service('path.current')->getPath();
+  $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+  $node = \Drupal::entityTypeManager()->getStorage('node')->load($params['node']);
+
+  // @todo clean this up
+  if ($node && $node->hasField('field_access')) {
+    $access = $node->get('field_access')->getValue();
+    if (is_array($access)) {
+      $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
+      $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
+      $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
+      if ($custom_node_access_view_roles) {
+        $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
+      }
+      if ($custom_node_access_edit_roles) {
+        $custom_node_access_edit_roles = explode(',', $custom_node_access_edit_roles);
+      }
+      if ($custom_node_access_author_roles) {
+        $custom_node_access_author_roles = explode(',', $custom_node_access_author_roles);
+      }
+    }
+  }
+
+  $roles = $account->getRoles();
+
   $grants = array();
   if ($account->id() > 0) {
     $grants['custom_node_access_author'] = array($account->id());
   }
-  if ($op == 'view') {
+  if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
     $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
   }
-  if ($op == 'update' || $op == 'delete') {
+  if (($op == 'update' && array_intersect($custom_node_access_edit_roles, $roles)) || ($op == 'delete' && array_intersect($custom_node_access_author_roles, $roles))) {
     $grants['custom_node_access_edit'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
   }
   return $grants;
 }
 
 function custom_node_access_node_access_records(NodeInterface $node)  {
+  // @todo clean this up
+  if ($node && $node->hasField('field_access')) {
+    $access = $node->get('field_access')->getValue();
+    if (is_array($access)) {
+      $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
+    }
+  }
   // @todo, there was a 2nd condition looking to see if field_access is set
-  if ($node->hasField('field_access')) {
+  if ($node->hasField('field_access') && $custom_node_access_view_roles) {
     $grants = array();
     $grants[] = [
       'realm' => 'custom_node_access_view',
