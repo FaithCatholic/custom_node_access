@@ -41,32 +41,32 @@ function custom_node_access_node_grants(AccountInterface $account, $op) {
     $access = $node->get('field_access')->getValue();
     if (is_array($access)) {
       $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-      $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
-      $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
+      // $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
+      // $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
       if ($custom_node_access_view_roles) {
         $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
       }
-      if ($custom_node_access_edit_roles) {
-        $custom_node_access_edit_roles = explode(',', $custom_node_access_edit_roles);
-      }
-      if ($custom_node_access_author_roles) {
-        $custom_node_access_author_roles = explode(',', $custom_node_access_author_roles);
-      }
+      // if ($custom_node_access_edit_roles) {
+      //   $custom_node_access_edit_roles = explode(',', $custom_node_access_edit_roles);
+      // }
+      // if ($custom_node_access_author_roles) {
+      //   $custom_node_access_author_roles = explode(',', $custom_node_access_author_roles);
+      // }
     }
   }
 
   $roles = $account->getRoles();
 
   $grants = array();
-  if ($account->id() > 0) {
-    $grants['custom_node_access_author'] = array($account->id());
-  }
+  // if ($account->id() > 0) {
+  //   $grants['custom_node_access_author'] = array($account->id());
+  // }
   if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
     $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
   }
-  if (($op == 'update' && array_intersect($custom_node_access_edit_roles, $roles)) || ($op == 'delete' && array_intersect($custom_node_access_author_roles, $roles))) {
-    $grants['custom_node_access_edit'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
-  }
+  // if (($op == 'update' && array_intersect($custom_node_access_edit_roles, $roles)) || ($op == 'delete' && array_intersect($custom_node_access_author_roles, $roles))) {
+  //   $grants['custom_node_access_edit'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+  // }
   return $grants;
 }
 
@@ -76,10 +76,11 @@ function custom_node_access_node_access_records(NodeInterface $node)  {
     // @todo clean this up
     if (is_array($access)) {
       $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-      $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
-      $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
+      // $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
+      // $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
     }
-    if ($custom_node_access_view_roles || $custom_node_access_edit_roles || $custom_node_access_author_roles) {
+    // if ($custom_node_access_view_roles || $custom_node_access_edit_roles || $custom_node_access_author_roles) {
+    if ($custom_node_access_view_roles) {
       $grants = array();
       $grants[] = [
         'realm' => 'custom_node_access_view',
@@ -89,24 +90,24 @@ function custom_node_access_node_access_records(NodeInterface $node)  {
         'grant_delete' => 0,
         'priority' => 0,
       ];
-      $grants[] = [
-        'realm' => 'custom_node_access_edit',
-        'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
-        'grant_view' => 1,
-        'grant_update' => 1,
-        'grant_delete' => 1,
-        'priority' => 0,
-      ];
-      if ($node->getOwnerId()) {
-        $grants[] = [
-          'realm' => 'custom_node_access_author',
-          'gid' => $node->getOwnerId(),
-          'grant_view' => 1,
-          'grant_update' => 1,
-          'grant_delete' => 1,
-          'priority' => 0,
-        ];
-      }
+      // $grants[] = [
+      //   'realm' => 'custom_node_access_edit',
+      //   'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
+      //   'grant_view' => 1,
+      //   'grant_update' => 1,
+      //   'grant_delete' => 1,
+      //   'priority' => 0,
+      // ];
+      // if ($node->getOwnerId()) {
+      //   $grants[] = [
+      //     'realm' => 'custom_node_access_author',
+      //     'gid' => $node->getOwnerId(),
+      //     'grant_view' => 1,
+      //     'grant_update' => 1,
+      //     'grant_delete' => 1,
+      //     'priority' => 0,
+      //   ];
+      // }
       return $grants;
     }
   }

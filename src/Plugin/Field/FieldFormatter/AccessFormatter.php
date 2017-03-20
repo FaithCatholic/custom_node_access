@@ -22,27 +22,28 @@ class AccessFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
-    $elements = [];
+    // $elements = [];
 
-    foreach ($items as $delta => $item) {
-      $markup = '';
+    // foreach ($items as $delta => $item) {
+    //   $markup = '';
 
-      if ($item->value1) {
-        $markup .= $item->value1;
-      }
-      if ($item->value1 && $item->value1) {
-        $markup .= ' ';
-      }
-      if ($item->value2) {
-        $markup .= $item->value2;
-      }
+    //   if ($item->value1) {
+    //     $markup .= $item->value1;
+    //   }
+    //   if ($item->value1 && $item->value1) {
+    //     $markup .= ' ';
+    //   }
+    //   if ($item->value2) {
+    //     $markup .= $item->value2;
+    //   }
 
-      if ($markup != '') {
-        $elements[$delta] = ['#markup' => $markup];
-      }
-    }
+    //   if ($markup != '') {
+    //     $elements[$delta] = ['#markup' => $markup];
+    //   }
+    // }
 
-    return $elements;
+    // return $elements;
+    return array();
   }
 
 }
