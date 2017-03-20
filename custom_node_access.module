@@ -21,7 +21,7 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
   if ($form['field_access']) {
     $node = $form_state->getFormObject()->getEntity();
     $form['access_settings'] = array(
-      '#description' => t('Specify any additional user roles that may access this content. <em>(Warning: delete access <strong>ALSO</strong> grants editing privileges.)</em>'),
+      '#description' => t('Grant user roles special access. <em>Note: enable "view" if "edit" or "delete" selected for any role.</em>'),
       '#group' => 'advanced',
       '#title' => t('User role access'),
       '#type' => 'details',
@@ -30,10 +30,6 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
     $form['field_access']['#group'] = 'access_settings';
   }
 }
-
-// function custom_node_access_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
-//   return AccessResult::neutral();
-// }
 
 function custom_node_access_node_grants(AccountInterface $account, $op) {
   $path = \Drupal::service('path.current')->getPath();
@@ -75,42 +71,43 @@ function custom_node_access_node_grants(AccountInterface $account, $op) {
 }
 
 function custom_node_access_node_access_records(NodeInterface $node)  {
-  // @todo clean this up
-  if ($node && $node->hasField('field_access')) {
+  if ($node->hasField('field_access')) {
     $access = $node->get('field_access')->getValue();
+    // @todo clean this up
     if (is_array($access)) {
       $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
+      $custom_node_access_edit_roles = $access[0]['custom_node_access_edit_roles'];
+      $custom_node_access_author_roles = $access[0]['custom_node_access_author_roles'];
     }
-  }
-  // @todo, there was a 2nd condition looking to see if field_access is set
-  if ($node->hasField('field_access') && $custom_node_access_view_roles) {
-    $grants = array();
-    $grants[] = [
-      'realm' => 'custom_node_access_view',
-      'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
-      'grant_view' => 1,
-      'grant_update' => 0,
-      'grant_delete' => 0,
-      'priority' => 0,
-    ];
-    $grants[] = [
-      'realm' => 'custom_node_access_edit',
-      'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
-      'grant_view' => 1,
-      'grant_update' => 1,
-      'grant_delete' => 1,
-      'priority' => 0,
-    ];
-    if ($node->getOwnerId()) {
+    if ($custom_node_access_view_roles || $custom_node_access_edit_roles || $custom_node_access_author_roles) {
+      $grants = array();
       $grants[] = [
-        'realm' => 'custom_node_access_author',
-        'gid' => $node->getOwnerId(),
+        'realm' => 'custom_node_access_view',
+        'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
+        'grant_view' => 1,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+        'priority' => 0,
+      ];
+      $grants[] = [
+        'realm' => 'custom_node_access_edit',
+        'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
         'grant_view' => 1,
         'grant_update' => 1,
         'grant_delete' => 1,
         'priority' => 0,
       ];
+      if ($node->getOwnerId()) {
+        $grants[] = [
+          'realm' => 'custom_node_access_author',
+          'gid' => $node->getOwnerId(),
+          'grant_view' => 1,
+          'grant_update' => 1,
+          'grant_delete' => 1,
+          'priority' => 0,
+        ];
+      }
+      return $grants;
     }
-    return $grants;
   }
 }
