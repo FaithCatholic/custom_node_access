@@ -25,10 +25,7 @@ class AccessWidget extends WidgetBase {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $realms = array(
       'custom_node_access_view' => 'View access',
-      // 'custom_node_access_edit' => 'Edit access',
-      // 'custom_node_access_author' => 'Delete access',
     );
-
     $roles = [];
     foreach (user_roles() as $role) {
       if (!$role->isAdmin()) {
@@ -62,7 +59,6 @@ class AccessWidget extends WidgetBase {
         ),
       );
     }
-
     return $element;
   }
 
@@ -71,24 +67,15 @@ class AccessWidget extends WidgetBase {
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
     foreach($values[0] as $key => &$value) {
-
       // Clear data if realm is unchecked in form.
       if ($key === 'custom_node_access_view_enabled' && $value !== 1) {
         $values[0]['custom_node_access_view_roles'] = NULL;
       }
-      // if ($key === 'custom_node_access_edit_enabled' && $value !== 1) {
-      //   $values[0]['custom_node_access_edit_roles'] = NULL;
-      // }
-      // if ($key === 'custom_node_access_author_enabled' && $value !== 1) {
-      //   $values[0]['custom_node_access_author_roles'] = NULL;
-      // }
-
       // Suppress primitive error by converting array value to a string value.
       // Combine multiple roles into a comma seperated value.
       if (is_array($value)) {
         $value = implode(',', $value);
       }
-
     }
     return $values;
   }

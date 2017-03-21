@@ -27,12 +27,6 @@ class AccessType extends FieldItemBase {
     $properties['custom_node_access_view_roles'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('View roles'))
       ->setRequired(FALSE);
-    // $properties['custom_node_access_edit_roles'] = DataDefinition::create('string')
-    //   ->setLabel(new TranslatableMarkup('Edit roles'))
-    //   ->setRequired(FALSE);
-    // $properties['custom_node_access_author_roles'] = DataDefinition::create('string')
-    //   ->setLabel(new TranslatableMarkup('Author roles'))
-    //   ->setRequired(FALSE);
     return $properties;
   }
 
@@ -46,17 +40,8 @@ class AccessType extends FieldItemBase {
           'type' => 'varchar',
           'length' => 255,
         ],
-        // 'custom_node_access_edit_roles' => [
-        //   'type' => 'varchar',
-        //   'length' => 255,
-        // ],
-        // 'custom_node_access_author_roles' => [
-        //   'type' => 'varchar',
-        //   'length' => 255,
-        // ],
       ],
     ];
-
     return $schema;
   }
 
