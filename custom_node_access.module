@@ -34,27 +34,33 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
 function custom_node_access_node_grants(AccountInterface $account, $op) {
   $path = \Drupal::service('path.current')->getPath();
   $params = Url::fromUri("internal:" . $path)->getRouteParameters();
-  $node = \Drupal::entityTypeManager()->getStorage('node')->load($params['node']);
 
-  if ($node && $node->hasField('field_access')) {
-    $access = $node->get('field_access')->getValue();
-    if (is_array($access)) {
-      $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-      if ($custom_node_access_view_roles) {
-        $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
+  if (array_key_exists('node', $params)) {
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($params['node']);
+
+    if ($node->hasField('field_access')) {
+      $access = $node->get('field_access')->getValue();
+
+      if (is_array($access)) {
+        $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
+
+        if ($custom_node_access_view_roles) {
+          $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
+        }
+
+        $roles = $account->getRoles();
+        $grants = array();
+
+        if (is_array($custom_node_access_view_roles)) {
+          if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
+            $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+          }
+        }
+
+        return $grants;
       }
     }
   }
-
-  $roles = $account->getRoles();
-
-  $grants = array();
-  if (is_array($custom_node_access_view_roles)) {
-    if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
-      $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
-    }
-  }
-  return $grants;
 }
 
 function custom_node_access_node_access_records(NodeInterface $node)  {
