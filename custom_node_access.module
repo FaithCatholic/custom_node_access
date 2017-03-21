@@ -61,8 +61,10 @@ function custom_node_access_node_grants(AccountInterface $account, $op) {
   // if ($account->id() > 0) {
   //   $grants['custom_node_access_author'] = array($account->id());
   // }
-  if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
-    $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+  if (is_array($custom_node_access_view_roles)) {
+    if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
+      $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
+    }
   }
   // if (($op == 'update' && array_intersect($custom_node_access_edit_roles, $roles)) || ($op == 'delete' && array_intersect($custom_node_access_author_roles, $roles))) {
   //   $grants['custom_node_access_edit'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);

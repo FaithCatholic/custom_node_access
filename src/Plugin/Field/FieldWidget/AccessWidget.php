@@ -85,7 +85,9 @@ class AccessWidget extends WidgetBase {
 
       // Suppress primitive error by converting array value to a string value.
       // Combine multiple roles into a comma seperated value.
-      $value = implode(',', $value);
+      if (is_array($value)) {
+        $value = implode(',', $value);
+      }
 
     }
     return $values;
