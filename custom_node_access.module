@@ -21,7 +21,8 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
   if ($form['field_access']) {
     $node = $form_state->getFormObject()->getEntity();
     $form['access_settings'] = array(
-      '#description' => t('Grant user roles special access to this content.'),
+      '#access' => \Drupal::currentUser()->hasPermission('edit custom node access'),
+      '#description' => t('Limit viewing access to specific user roles.'),
       '#group' => 'advanced',
       '#title' => t('User role access'),
       '#type' => 'details',
