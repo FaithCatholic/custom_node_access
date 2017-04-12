@@ -18,28 +18,30 @@ define('CUSTOM_NODE_ACCESS_GRANT_ALL', 42);
  */
 function custom_node_access_form_node_form_alter(&$form, FormStateInterface $form_state) {
   // @todo, is there a way to automatically add this field to all nodes?
-  if ($form['field_access']) {
-    $node = $form_state->getFormObject()->getEntity();
-    $form['access_settings'] = array(
-      '#access' => \Drupal::currentUser()->hasPermission('edit custom node access'),
-      '#description' => t('Limit viewing access to specific user roles.'),
-      '#group' => 'advanced',
-      '#title' => t('User role access'),
-      '#type' => 'details',
-      '#weight' => -1,
-    );
-    $form['field_access']['#group'] = 'access_settings';
+  if (array_key_exists('field_access', $form)) {
+    if ($form['field_access']) {
+      $node = $form_state->getFormObject()->getEntity();
+      $form['access_settings'] = array(
+        '#access' => \Drupal::currentUser()->hasPermission('edit custom node access'),
+        '#description' => t('Limit viewing access to specific user roles.'),
+        '#group' => 'advanced',
+        '#title' => t('User role access'),
+        '#type' => 'details',
+        '#weight' => -1,
+      );
+      $form['field_access']['#group'] = 'access_settings';
+    }
   }
 }
 
 function custom_node_access_node_grants(AccountInterface $account, $op) {
   $path = \Drupal::service('path.current')->getPath();
-  $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+  $nid = substr($path, strrpos($path, '/') + 1);
 
-  if (array_key_exists('node', $params)) {
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($params['node']);
+  if (is_numeric($nid)) {
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
 
-    if ($node->hasField('field_access')) {
+    if (is_object($node) && $node->hasField('field_access')) {
       $access = $node->get('field_access')->getValue();
 
       if (is_array($access)) {
