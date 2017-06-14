@@ -1,5 +1,5 @@
 { 
-"name": "faithcatholic/custom_node_access"
+"name": "faithcatholic/custom_node_access",
  "type": "drupal-module",
  "description": "Adds option for page access by role",
  "keywords": ["Drupal"],
