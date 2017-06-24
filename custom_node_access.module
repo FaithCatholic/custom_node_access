@@ -14,6 +14,21 @@ use Drupal\node\NodeInterface;
 define('CUSTOM_NODE_ACCESS_GRANT_ALL', 42);
 
 /**
+ * Implements hook_entity_access().
+ *
+ * Forces private files embedded into nodes to load for authenticated users, since nodes with
+ * grants don't seem to grant embedded private files access for some reason.
+ */
+function custom_node_access_entity_access($entity, $operation, $account, $langcode) {
+  $roles = $account->getRoles();
+  $type = $entity->getEntityTypeId();
+  $path = \Drupal::service('path.current')->getPath();
+  if ($type === 'node' && $path === '/system/files' && in_array('authenticated', $roles)) {
+    return AccessResult::allowed();
+  }
+}
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
  */
 function custom_node_access_form_node_form_alter(&$form, FormStateInterface $form_state) {
