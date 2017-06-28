@@ -19,7 +19,7 @@ define('CUSTOM_NODE_ACCESS_GRANT_ALL', 42);
  * Forces private files embedded into nodes to load for authenticated users, since nodes with
  * grants don't seem to grant embedded private files access for some reason.
  */
-function custom_node_access_entity_access($entity, $operation, $account, $langcode) {
+function custom_node_access_entity_access($entity, $operation, $account) {
   $roles = $account->getRoles();
   $type = $entity->getEntityTypeId();
   $path = \Drupal::service('path.current')->getPath();
