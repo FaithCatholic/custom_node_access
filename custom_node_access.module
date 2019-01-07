@@ -49,54 +49,47 @@ function custom_node_access_form_node_form_alter(&$form, FormStateInterface $for
   }
 }
 
+/**
+ * Implements hook_node_grants().
+ */
 function custom_node_access_node_grants(AccountInterface $account, $op) {
-  $path = \Drupal::service('path.current')->getPath();
-  $nid = substr($path, strrpos($path, '/') + 1);
-
-  if (is_numeric($nid)) {
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-
-    if (is_object($node) && $node->hasField('field_access')) {
-      $access = $node->get('field_access')->getValue();
-
-      if (is_array($access)) {
-        $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-
-        if ($custom_node_access_view_roles) {
-          $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
-        }
-
-        $roles = $account->getRoles();
-        $grants = array();
-
-        if (is_array($custom_node_access_view_roles)) {
-          if ($op == 'view' && array_intersect($custom_node_access_view_roles, $roles)) {
-            $grants['custom_node_access_view'] = array(CUSTOM_NODE_ACCESS_GRANT_ALL);
-          }
-        }
-
-        return $grants;
-      }
-    }
+  $roles = $account->getRoles();
+  $role_numbers = [];
+  foreach ($roles as $role) {
+    $role = str_replace("_", "", $role);
+    $role_numbers[] = substr(base_convert($role, 36, 10), 0, 5);
   }
+  $grants['custom_node_access_view'] = $role_numbers;
+  return $grants;
 }
 
+/**
+ * Implements hook_node_access_records().
+ */
 function custom_node_access_node_access_records(NodeInterface $node)  {
   if ($node->hasField('field_access')) {
     $access = $node->get('field_access')->getValue();
     if (is_array($access)) {
       $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-    }
-    if ($custom_node_access_view_roles) {
-      $grants = array();
-      $grants[] = [
-        'realm' => 'custom_node_access_view',
-        'gid' => CUSTOM_NODE_ACCESS_GRANT_ALL,
-        'grant_view' => 1,
-        'grant_update' => 0,
-        'grant_delete' => 0,
-        'priority' => 0,
-      ];
+
+      if ($custom_node_access_view_roles) {
+        $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
+      }
+      foreach ($custom_node_access_view_roles as $role) {
+        $role = str_replace("_", "", $role);
+        // Convert the role machine name to a 5 digit integer so that it can be used
+        // as a gid, which requires an integer.
+        $role_number = substr(base_convert($role, 36, 10), 0, 5);
+        $grants = [];
+        $grants[] = [
+          'realm' => 'custom_node_access_view',
+          'gid' => $role_number,
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0,
+          'priority' => 0,
+        ];
+      }
       return $grants;
     }
   }
