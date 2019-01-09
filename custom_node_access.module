@@ -71,16 +71,15 @@ function custom_node_access_node_access_records(NodeInterface $node)  {
     $access = $node->get('field_access')->getValue();
     if (is_array($access)) {
       $custom_node_access_view_roles = $access[0]['custom_node_access_view_roles'];
-
       if ($custom_node_access_view_roles) {
         $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
       }
+      $grants = [];
       foreach ($custom_node_access_view_roles as $role) {
         $role = str_replace("_", "", $role);
         // Convert the role machine name to a 5 digit integer so that it can be used
         // as a gid, which requires an integer.
         $role_number = substr(base_convert($role, 36, 10), 0, 5);
-        $grants = [];
         $grants[] = [
           'realm' => 'custom_node_access_view',
           'gid' => $role_number,
