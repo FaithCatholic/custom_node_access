@@ -75,19 +75,21 @@ function custom_node_access_node_access_records(NodeInterface $node)  {
         $custom_node_access_view_roles = explode(',', $custom_node_access_view_roles);
       }
       $grants = [];
-      foreach ($custom_node_access_view_roles as $role) {
-        $role = str_replace("_", "", $role);
-        // Convert the role machine name to a 5 digit integer so that it can be used
-        // as a gid, which requires an integer.
-        $role_number = substr(base_convert($role, 36, 10), 0, 5);
-        $grants[] = [
-          'realm' => 'custom_node_access_view',
-          'gid' => $role_number,
-          'grant_view' => 1,
-          'grant_update' => 0,
-          'grant_delete' => 0,
-          'priority' => 0,
-        ];
+      if ($custom_node_access_view_roles) {
+        foreach ($custom_node_access_view_roles as $role) {
+          $role = str_replace("_", "", $role);
+          // Convert the role machine name to a 5 digit integer so that it can be used
+          // as a gid, which requires an integer.
+          $role_number = substr(base_convert($role, 36, 10), 0, 5);
+          $grants[] = [
+            'realm' => 'custom_node_access_view',
+            'gid' => $role_number,
+            'grant_view' => 1,
+            'grant_update' => 0,
+            'grant_delete' => 0,
+            'priority' => 0,
+          ];
+        }
       }
       return $grants;
     }
